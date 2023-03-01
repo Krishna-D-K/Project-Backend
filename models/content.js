@@ -1,5 +1,9 @@
 module.exports = (sequelize, DataTypes) =>{
     const courseContent = sequelize.define("CourseContent", {
+        semester: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         courseCode: {
             type: DataTypes.STRING,
             allowNull: false
@@ -13,6 +17,10 @@ module.exports = (sequelize, DataTypes) =>{
             allowNull: false
         },
         publicUrl: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        downloadUrl: {
             type: DataTypes.STRING,
             allowNull: false
         },

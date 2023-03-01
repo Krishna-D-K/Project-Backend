@@ -64,7 +64,8 @@ const generateUrl = async (req, res) => {
         })
         console.log(result.data.webViewLink);
         return {
-            webViewLink : result.data.webViewLink,
+            webViewLink: result.data.webViewLink,
+            webContentLink: result.data.webContentLink,
             fileID: data.id
         };
     } catch (error) {
@@ -74,20 +75,23 @@ const generateUrl = async (req, res) => {
 }
 
 const addContent = async (req, res) => {
-    const { type, courseCode, name, rollNo, desc, anonymous } = req.body;
-    let publicUrl, fileID;
-    if(type === "Playlist"){
+    const { type, semester, courseCode, name, rollNo, desc, anonymous } = req.body;
+    let publicUrl, downloadUrl, fileID;
+    if (type === "Playlist") {
         publicUrl = req.body.url
+        downloadUrl = req.body.url
         fileID = publicUrl
     }
-    else{
+    else {
         let object = await generateUrl(req, res);
         publicUrl = object.webViewLink;
+        downloadUrl = object.webContentLink;
         fileID = object.fileID;
     }
 
     try {
         const data = await CourseContent.create({
+            semester: semester,
             type: type,
             courseCode: courseCode,
             authorName: name,
@@ -95,6 +99,7 @@ const addContent = async (req, res) => {
             description: desc,
             anonymous: anonymous,
             publicUrl: publicUrl,
+            downloadUrl: downloadUrl,
             fileID: fileID
         })
         res.status(200).json(data);
@@ -104,4 +109,146 @@ const addContent = async (req, res) => {
     }
 }
 
-module.exports = { addContent }
+const deleteContent = async (req, res) => {
+    const { isFile, fileID } = req.params;
+    console.log(isFile);
+    if (isFile === "true") {
+        const drive = setDriveAuth();
+        try {
+            await CourseContent.destroy({
+                where: {
+                    fileID: fileID
+                }
+            }).then(async () => {
+                drive.files.delete({
+                    fileId: fileID
+                }).then(() => {
+                    res.status(200).json("File deleted successfully!!");
+                })
+            })
+        } catch (error) {
+            console.log(error);
+            res.status(401).json({ Error: error })
+        }
+    }
+    else {
+        try {
+            await CourseContent.destroy({
+                where: {
+                    fileID: fileID
+                }
+            }).then((response) => {
+                res.status(200).json("File deleted successfully!!");
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    }
+}
+
+const getContent = async (req, res) => {
+    const role = req.body.user.role;
+    if (role === "Owner") {
+        try {
+            const data = await CourseContent.findAll();
+            res.status(200).json(data);
+        } catch (error) {
+            console.log(error);
+            res.status(401).json({ Error: error });
+        }
+    }
+    else if (role === "Admin1") {
+        try {
+            const data = await CourseContent.findAll({
+                where: {
+                    semester: "FIRST" || "SECOND"
+                }
+            });
+            res.status(200).json(data);
+        } catch (error) {
+            console.log(error);
+            res.status(401).json({ Error: error });
+        }
+    }
+    else if (role === "Admin2") {
+        try {
+            const data = await CourseContent.findAll({
+                where: {
+                    semester: "THIRD" || "FOURTH"
+                }
+            });
+            res.status(200).json(data);
+        } catch (error) {
+            console.log(error);
+            res.status(401).json({ Error: error });
+        }
+    }
+    else if (role === "Admin3") {
+        try {
+            const data = await CourseContent.findAll({
+                where: {
+                    semester: "FIFTH" || "SIXTH"
+                }
+            });
+            res.status(200).json(data);
+        } catch (error) {
+            console.log(error);
+            res.status(401).json({ Error: error });
+        }
+    }
+    else if (role === "Admin4") {
+        try {
+            const data = await CourseContent.findAll({
+                where: {
+                    semester: "SEVENTH" || "EIGHTH"
+                }
+            });
+            res.status(200).json(data);
+        } catch (error) {
+            console.log(error);
+            res.status(401).json({ Error: error });
+        }
+    }
+    else if (role === "Admin5") {
+        try {
+            const data = await CourseContent.findAll({
+                where: {
+                    semester: "NINTH" || "TENTH"
+                }
+            });
+            res.status(200).json(data);
+        } catch (error) {
+            console.log(error);
+            res.status(401).json({ Error: error });
+        }
+    }
+}
+
+const getCourseContent = async (req, res) => {
+    const { code } = req.params;
+    try {
+        const data = await CourseContent.findAll({
+            where: {
+                courseCode: code
+            }
+        })
+        res.status(200).json(data);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const editContent = async (req, res) => {
+    try {
+        const data = await CourseContent.update({...req.body}, {
+            where: {
+                fileID: req.body.fileID
+            }
+        })
+        res.status(200).json("Updated!!");
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+module.exports = { addContent, deleteContent, getContent, getCourseContent, editContent }
