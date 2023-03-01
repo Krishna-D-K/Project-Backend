@@ -71,25 +71,31 @@ const deleteUser = async (req, res) => {
 }
 
 const getUsers = async (req, res) =>{
-    const user = Users.findAll({
-        where: {
-            role : req.body.user.role,
-        }
-    }).then((docs, err)=>{
-        if(err){
-            res.status(401).json({error: err});
-        }
-        else{
-            const user = req.body.user;
-            let data = [];
-            docs.map((val, index)=>{
-                if(val.rollNo[0]===user.rollNo[0] && val.rollNo[1]===user.rollNo[1]){
-                    data.push(val);
-                }
-            })
-            res.status(200).json(data)
-        }
-    })
+    if(req.body.user.role!=="Owner"){
+        const user = await Users.findAll({ 
+            where: {
+                role : req.body.user.role,
+            }
+        }).then((docs, err)=>{
+            if(err){
+                res.status(401).json({error: err});
+            }
+            else{
+                const user = req.body.user;
+                let data = [];
+                docs.map((val, index)=>{
+                    if(val.rollNo[0]===user.rollNo[0] && val.rollNo[1]===user.rollNo[1]){ //comparing the first two digits of the roll nos
+                        data.push(val);
+                    }
+                })
+                res.status(200).json(data)
+            }
+        })
+    }
+    else{
+        const user = await Users.findAll();
+        res.status(200).json(user);
+    }
 }
 
 module.exports = { addUser, deleteUser, loginUser, getUsers };
