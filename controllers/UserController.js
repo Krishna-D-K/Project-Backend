@@ -1,22 +1,20 @@
 require('dotenv').config({ path: "../config.env" })
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { Users } = require("../models");
+const Users = require("../models/users");
 
 function token(rollNo) {
     return jwt.sign({ rollNo }, `${process.env.JWT_SECRET}`, { expiresIn: "1d" })
 }
 
 const addUser = async (req, res) => {
-    const user = await Users.findOne({
-        where: {
-            rollNo: req.body.rollNo
-        }
+    const user = await Users.find({
+        rollNo: req.body.rollNo
     })
-    if(user){
+    if (user.length!==0) {
         res.status(400).json("User already exists");
     }
-    else{
+    else {
         try {
             const salt = await bcrypt.genSalt(10);
             const hash = await bcrypt.hash(req.body.password, salt);
@@ -35,19 +33,17 @@ const addUser = async (req, res) => {
 }
 
 const loginUser = async (req, res) => {
-    const user = await Users.findOne({
-        where: {
-            rollNo: req.body.rollNo
-        }
+    const user = await Users.find({
+        rollNo: req.body.rollNo
     });
-    if (!user) {
+    if (user.length===0) {
         res.status(201).json("no such user exists");
     }
-    else{
-        const match = await bcrypt.compare(req.body.password, user.password)
+    else {
+        const match = await bcrypt.compare(req.body.password, user[0].password)
         if (match) {
             const jsonToken = token(req.body.rollNo);
-            res.status(200).json({ "id": user.id, "name": user.name, "role": user.role,"rollNo": user.rollNo,"token": jsonToken })
+            res.status(200).json({ "id": user.id, "name": user.name, "role": user.role, "rollNo": user.rollNo, "token": jsonToken })
         }
         else {
             res.status(201).json("wrong password");
@@ -59,10 +55,8 @@ const loginUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     const { id } = req.params;
     try {
-        const user = await Users.destroy({
-            where: {
-                id: id
-            }
+        const user = await Users.findOneAndDelete({
+            _id: id
         })
         res.status(200).json({ "message": "User deleted successfully!", "body": user });
     } catch (err) {
@@ -70,21 +64,19 @@ const deleteUser = async (req, res) => {
     }
 }
 
-const getUsers = async (req, res) =>{
-    if(req.body.user.role!=="Owner"){
-        const user = await Users.findAll({ 
-            where: {
-                role : req.body.user.role,
+const getUsers = async (req, res) => {
+    if (req.body.user[0].role !== "Owner") {
+        const user = await Users.find({
+            role: req.body.user[0].role,
+        }).then((docs, err) => {
+            if (err) {
+                res.status(401).json({ error: err });
             }
-        }).then((docs, err)=>{
-            if(err){
-                res.status(401).json({error: err});
-            }
-            else{
-                const user = req.body.user;
+            else {
+                const user = req.body.user[0];
                 let data = [];
-                docs.map((val, index)=>{
-                    if(val.rollNo[0]===user.rollNo[0] && val.rollNo[1]===user.rollNo[1]){ //comparing the first two digits of the roll nos
+                docs.map((val, index) => {
+                    if (val.rollNo[0] === user.rollNo[0] && val.rollNo[1] === user.rollNo[1]) { //comparing the first two digits of the roll nos
                         data.push(val);
                     }
                 })
@@ -92,8 +84,8 @@ const getUsers = async (req, res) =>{
             }
         })
     }
-    else{
-        const user = await Users.findAll();
+    else {
+        const user = await Users.find({});
         res.status(200).json(user);
     }
 }

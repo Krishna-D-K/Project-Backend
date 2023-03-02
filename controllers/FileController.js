@@ -1,6 +1,6 @@
 require('dotenv').config({ path: "../config.env" })
 const { google } = require('googleapis');
-const { CourseContent } = require("../models");
+const CourseContent = require("../models/content");
 
 const setDriveAuth = () => {
     const clientId = process.env.CLIENT_ID;
@@ -115,10 +115,8 @@ const deleteContent = async (req, res) => {
     if (isFile === "true") {
         const drive = setDriveAuth();
         try {
-            await CourseContent.destroy({
-                where: {
-                    fileID: fileID
-                }
+            await CourseContent.findOneAndDelete({
+                fileID: fileID
             }).then(async () => {
                 drive.files.delete({
                     fileId: fileID
@@ -133,10 +131,8 @@ const deleteContent = async (req, res) => {
     }
     else {
         try {
-            await CourseContent.destroy({
-                where: {
-                    fileID: fileID
-                }
+            await CourseContent.findOneAndDelete({
+                fileID: fileID
             }).then((response) => {
                 res.status(200).json("File deleted successfully!!");
             })
@@ -147,10 +143,10 @@ const deleteContent = async (req, res) => {
 }
 
 const getContent = async (req, res) => {
-    const role = req.body.user.role;
+    const role = req.body.user[0].role;
     if (role === "Owner") {
         try {
-            const data = await CourseContent.findAll();
+            const data = await CourseContent.find({});
             res.status(200).json(data);
         } catch (error) {
             console.log(error);
@@ -159,10 +155,8 @@ const getContent = async (req, res) => {
     }
     else if (role === "Admin1") {
         try {
-            const data = await CourseContent.findAll({
-                where: {
-                    semester: "FIRST" || "SECOND"
-                }
+            const data = await CourseContent.find({
+                semester: "FIRST" || "SECOND"
             });
             res.status(200).json(data);
         } catch (error) {
@@ -172,10 +166,8 @@ const getContent = async (req, res) => {
     }
     else if (role === "Admin2") {
         try {
-            const data = await CourseContent.findAll({
-                where: {
-                    semester: "THIRD" || "FOURTH"
-                }
+            const data = await CourseContent.find({
+                semester: "THIRD" || "FOURTH"
             });
             res.status(200).json(data);
         } catch (error) {
@@ -185,10 +177,8 @@ const getContent = async (req, res) => {
     }
     else if (role === "Admin3") {
         try {
-            const data = await CourseContent.findAll({
-                where: {
-                    semester: "FIFTH" || "SIXTH"
-                }
+            const data = await CourseContent.find({
+                semester: "FIFTH" || "SIXTH"
             });
             res.status(200).json(data);
         } catch (error) {
@@ -198,10 +188,8 @@ const getContent = async (req, res) => {
     }
     else if (role === "Admin4") {
         try {
-            const data = await CourseContent.findAll({
-                where: {
-                    semester: "SEVENTH" || "EIGHTH"
-                }
+            const data = await CourseContent.find({
+                semester: "SEVENTH" || "EIGHTH"
             });
             res.status(200).json(data);
         } catch (error) {
@@ -211,10 +199,8 @@ const getContent = async (req, res) => {
     }
     else if (role === "Admin5") {
         try {
-            const data = await CourseContent.findAll({
-                where: {
-                    semester: "NINTH" || "TENTH"
-                }
+            const data = await CourseContent.find({
+                semester: "NINTH" || "TENTH"
             });
             res.status(200).json(data);
         } catch (error) {
@@ -227,10 +213,8 @@ const getContent = async (req, res) => {
 const getCourseContent = async (req, res) => {
     const { code } = req.params;
     try {
-        const data = await CourseContent.findAll({
-            where: {
-                courseCode: code
-            }
+        const data = await CourseContent.find({
+            courseCode: code
         })
         res.status(200).json(data);
     } catch (error) {
@@ -240,11 +224,9 @@ const getCourseContent = async (req, res) => {
 
 const editContent = async (req, res) => {
     try {
-        const data = await CourseContent.update({...req.body}, {
-            where: {
-                fileID: req.body.fileID
-            }
-        })
+        const data = await CourseContent.findOneAndUpdate({
+            fileID: req.body.fileID
+        }, { ...req.body })
         res.status(200).json("Updated!!");
     } catch (error) {
         console.log(error)

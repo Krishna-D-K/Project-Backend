@@ -1,6 +1,6 @@
-require('dotenv').config({path: "../config.env"});
+require('dotenv').config({ path: "../config.env" });
 const jwt = require('jsonwebtoken');
-const { Users } = require("../models");
+const Users = require("../models/users");
 
 const requireAuth = async (req, res, next) => {
 
@@ -13,15 +13,13 @@ const requireAuth = async (req, res, next) => {
     else {
         const token = authorization.split(" ")[1];
         try {
-            const { rollNo } = jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJWT)=>{
-                if(err){
+            const { rollNo } = jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJWT) => {
+                if (err) {
                     console.log(err);
                 }
-                else{
-                    req.body.user = await Users.findOne({
-                        where: {
-                            rollNo: verifiedJWT.rollNo
-                        }
+                else {
+                    req.body.user = await Users.find({
+                        rollNo: verifiedJWT.rollNo
                     })
                     next();
                 }

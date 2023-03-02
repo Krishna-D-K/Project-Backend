@@ -1,46 +1,46 @@
-module.exports = (sequelize, DataTypes) =>{
-    const courseContent = sequelize.define("CourseContent", {
-        semester: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        courseCode: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        type: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        description: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        publicUrl: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        downloadUrl: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        authorName: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        authorID: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        anonymous: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false
-        },
-        fileID: {
-            type: DataTypes.STRING,
-            allowNull: false
-        }
-    })
+const mongoose = require("mongoose");
 
-    return courseContent;
-}
+const CourseContent = new mongoose.Schema({
+    semester: {
+        type: String,
+        required: true
+    },
+    courseCode: {
+        type: String,
+        required: true
+    },
+    type: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    publicUrl: {
+        type: String,
+        required: true
+    },
+    downloadUrl: {
+        type: String,
+        required: true
+    },
+    authorName: {
+        type: String,
+        required: true
+    },
+    authorID: {
+        type: String,
+        required: true
+    },
+    anonymous: {
+        type: Boolean,
+        required: true
+    },
+    fileID: {
+        type: String,
+        required: true
+    }
+}, {timestamps : true})
+
+module.exports = mongoose.model("CourseContent", CourseContent);
