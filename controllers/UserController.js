@@ -43,7 +43,7 @@ const loginUser = async (req, res) => {
         const match = await bcrypt.compare(req.body.password, user[0].password)
         if (match) {
             const jsonToken = token(req.body.rollNo);
-            res.status(200).json({ "id": user.id, "name": user.name, "role": user.role, "rollNo": user.rollNo, "token": jsonToken })
+            res.status(200).json({ "id": user[0].id, "name": user[0].name, "role": user[0].role, "rollNo": user[0].rollNo, "token": jsonToken })
         }
         else {
             res.status(201).json("wrong password");
