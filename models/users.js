@@ -13,6 +13,26 @@ const Users = new mongoose.Schema({
         type: String,
         required : true
     },
+    email: {
+        type: String,
+        required : true
+    },
+    instiMail: {
+        type: String,
+        required : true
+    },
+    phone: {
+        type: String,
+        required : true
+    },
+    fbLink: {
+        type: String,
+        required : false
+    },
+    linkedinLink: {
+        type: String,
+        required : false
+    },
     password: {
         type: String,
         required : true

@@ -11,7 +11,7 @@ const addUser = async (req, res) => {
     const user = await Users.find({
         rollNo: req.body.rollNo
     })
-    if (user.length!==0) {
+    if (user.length !== 0) {
         res.status(400).json("User already exists");
     }
     else {
@@ -23,7 +23,12 @@ const addUser = async (req, res) => {
                 name: req.body.name,
                 rollNo: req.body.rollNo,
                 password: hash,
-                role: req.body.role
+                role: req.body.role,
+                email: req.body.email,
+                instiMail: req.body.instiMail,
+                phone: req.body.phone,
+                fbLink: req.body.fbLink,
+                linkedinLink: req.body.linkedinLink
             });
             res.status(200).json({ "message": "User created successfully!", "body": user, "token": jsonToken });
         } catch (err) {
@@ -36,14 +41,14 @@ const loginUser = async (req, res) => {
     const user = await Users.find({
         rollNo: req.body.rollNo
     });
-    if (user.length===0) {
+    if (user.length === 0) {
         res.status(201).json("no such user exists");
     }
     else {
         const match = await bcrypt.compare(req.body.password, user[0].password)
         if (match) {
             const jsonToken = token(req.body.rollNo);
-            res.status(200).json({ "id": user[0].id, "name": user[0].name, "role": user[0].role, "rollNo": user[0].rollNo, "token": jsonToken })
+            res.status(200).json({ "id": user[0].id, "name": user[0].name, "role": user[0].role, "rollNo": user[0].rollNo,"phone": user[0].phone, "email": user[0].email, "instiMail": user[0].instiMail, "fbLink": user[0].fbLink, "linkedinLink": user[0].linkedinLink, "token": jsonToken })
         }
         else {
             res.status(201).json("wrong password");
@@ -90,4 +95,14 @@ const getUsers = async (req, res) => {
     }
 }
 
-module.exports = { addUser, deleteUser, loginUser, getUsers };
+const editUser = async(req, res) =>{
+    try {
+        await Users.findOneAndUpdate({_id: req.body.user[0]._id}, {...req.body}).then((response)=>{
+            res.status(200).json("updated Succesfully!!");
+        })
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+module.exports = { addUser, deleteUser, loginUser, getUsers, editUser };
