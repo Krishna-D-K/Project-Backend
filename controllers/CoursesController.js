@@ -44,4 +44,9 @@ const updateCourse = async (req, res) => {
     res.status(200).json(data);
 }
 
-module.exports = { getAllCourses, getCourse, addCourse, deleteCourse, updateCourse }
+const countCourses = async (req, res) =>{
+    const data = await Courses.count({})
+    res.status(200).json(data);
+}
+
+module.exports = { getAllCourses, getCourse, addCourse, deleteCourse, updateCourse, countCourses }

@@ -110,8 +110,8 @@ const addContent = async (req, res) => {
 }
 
 const deleteContent = async (req, res) => {
-    const { isFile, fileID } = req.params;
-    if (isFile === true) {
+    const { isPlaylist, fileID } = req.params;
+    if (isPlaylist === false) {
         const drive = setDriveAuth();
         try {
             await CourseContent.findOneAndDelete({
@@ -131,7 +131,7 @@ const deleteContent = async (req, res) => {
     else {
         try {
             await CourseContent.findOneAndDelete({
-                _id: fileID
+                fileID: fileID
             }).then((response) => {
                 res.status(200).json("File deleted successfully!!");
             })
@@ -232,4 +232,68 @@ const editContent = async (req, res) => {
     }
 }
 
-module.exports = { addContent, deleteContent, getContent, getCourseContent, editContent }
+const countData = async (req, res) => {
+    try {
+        const content = await CourseContent.count({});
+        const contributors = await CourseContent.distinct("authorID");
+        // console.log(contributors.length, content);
+        res.status(200).json({ content: content, contributors: contributors.length });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const getContributors = async (req, res) => {
+    const aggregatorOpts1 = [
+        {
+            $match: {
+                "anonymous": false
+            }
+        },
+        {
+            $group: {
+                _id: { "authorID": "$authorID", "authorName": "$authorName" },
+                count: { $sum: 1 }
+            }
+        }
+    ];
+    const aggregatorOpts2 = [
+        {
+            $match: {
+                "anonymous": true
+            }
+        },
+        {
+            $group: {
+                _id: { "authorID": "$authorID", "authorName": "$authorName" },
+                count: { $sum: 1 }
+            }
+        }
+    ];
+    const data1 = await CourseContent.aggregate(aggregatorOpts1);
+    const data2 = await CourseContent.aggregate(aggregatorOpts2);
+    const data = [];
+    let count=0;
+    data1.map((value, index) => {
+        data.push({
+            name: value._id.authorName,
+            rollNo: value._id.authorID,
+            contributions: value.count
+        })
+    })
+    data2.map((value, index) => {
+        count = count + value.count;   
+    })
+    data.push({
+        name: "Anonymous",
+        rollNo: "--",
+        contributions: count
+    })
+    console.log(data1, data2);
+    data.sort((a,b)=>{
+        return b.contributions - a.contributions;
+    })
+    res.status(200).json(data);
+}
+
+module.exports = { addContent, deleteContent, getContent, getCourseContent, editContent, countData, getContributors }
