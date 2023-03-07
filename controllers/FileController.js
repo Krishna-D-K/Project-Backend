@@ -111,7 +111,7 @@ const addContent = async (req, res) => {
 
 const deleteContent = async (req, res) => {
     const { isPlaylist, fileID } = req.params;
-    if (isPlaylist === false) {
+    if (isPlaylist === "false") {
         const drive = setDriveAuth();
         try {
             await CourseContent.findOneAndDelete({
@@ -131,7 +131,7 @@ const deleteContent = async (req, res) => {
     else {
         try {
             await CourseContent.findOneAndDelete({
-                fileID: fileID
+                _id : fileID
             }).then((response) => {
                 res.status(200).json("File deleted successfully!!");
             })
