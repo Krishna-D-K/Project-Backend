@@ -29,14 +29,6 @@ const addCourse = async (req, res) => {
     }
 }
 
-const deleteCourse = async (req, res) => {
-    const { id } = req.params;
-    const data = await Courses.findOneAndDelete({
-        _id: id
-    })
-    res.status(200).json(data);
-}
-
 const updateCourse = async (req, res) => {
     const { id } = req.params;
     const data = await Courses.findOneAndUpdate({ _id: id }, { ...req.body })
@@ -49,4 +41,4 @@ const countCourses = async (req, res) =>{
     res.status(200).json(data);
 }
 
-module.exports = { getAllCourses, getCourse, addCourse, deleteCourse, updateCourse, countCourses }
+module.exports = { getAllCourses, getCourse, addCourse, updateCourse, countCourses }

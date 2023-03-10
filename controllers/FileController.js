@@ -1,6 +1,7 @@
 require('dotenv').config({ path: "../config.env" })
 const { google } = require('googleapis');
 const CourseContent = require("../models/content");
+const Courses = require("../models/courses");
 
 const setDriveAuth = () => {
     const clientId = process.env.CLIENT_ID;
@@ -131,7 +132,7 @@ const deleteContent = async (req, res) => {
     else {
         try {
             await CourseContent.findOneAndDelete({
-                _id : fileID
+                _id: fileID
             }).then((response) => {
                 res.status(200).json("File deleted successfully!!");
             })
@@ -273,7 +274,7 @@ const getContributors = async (req, res) => {
     const data1 = await CourseContent.aggregate(aggregatorOpts1);
     const data2 = await CourseContent.aggregate(aggregatorOpts2);
     const data = [];
-    let count=0;
+    let count = 0;
     data1.map((value, index) => {
         data.push({
             name: value._id.authorName,
@@ -282,7 +283,7 @@ const getContributors = async (req, res) => {
         })
     })
     data2.map((value, index) => {
-        count = count + value.count;   
+        count = count + value.count;
     })
     data.push({
         name: "Anonymous",
@@ -290,10 +291,56 @@ const getContributors = async (req, res) => {
         contributions: count
     })
     console.log(data1, data2);
-    data.sort((a,b)=>{
+    data.sort((a, b) => {
         return b.contributions - a.contributions;
     })
     res.status(200).json(data);
 }
 
-module.exports = { addContent, deleteContent, getContent, getCourseContent, editContent, countData, getContributors }
+const deleteCourse = async (req, res) => {
+    const { id } = req.params;
+    let coursecode = 0
+    try {
+        await Courses.find({
+            _id: id
+        }).then((docs, err) => {
+            coursecode = docs[0].courseCode
+        })
+        if (coursecode) {
+            const docs = await CourseContent.find({
+                courseCode: coursecode
+            })
+            if (docs.length) {
+                docs.map(async (value, index) => {
+                    if (value.type !== "Playlist") {
+                        const drive = setDriveAuth();
+                        await drive.files.delete({
+                            fileId: value.fileID
+                        }).then(async () => {
+                            await CourseContent.findOneAndDelete({
+                                _id: value._id
+                            })
+                        })
+                    }
+                    else {
+                        await CourseContent.findOneAndDelete({
+                            _id: value._id
+                        })
+                    }
+                })
+            }
+        }
+
+        await Courses.findOneAndDelete({
+            _id: id
+        }).then((response) => {
+            res.status(200).json("Course deleted successfully");
+        })
+    }
+    catch(err){
+        console.log(err);
+        res.status(401).json({Error: err});
+    }
+}
+
+module.exports = { addContent, deleteContent, getContent, getCourseContent, editContent, countData, getContributors, deleteCourse }

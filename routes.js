@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const upload = multer();
-const {getAllCourses, getCourse, addCourse, deleteCourse, updateCourse, countCourses} = require('./controllers/CoursesController');
+const {getAllCourses, getCourse, addCourse, updateCourse, countCourses} = require('./controllers/CoursesController');
 const { addUser, deleteUser, loginUser, getUsers, editUser } = require('./controllers/UserController');
 const requireAuth = require("./middleware/requireAuth");
-const { addContent, deleteContent, getContent, getCourseContent, editContent, countData, getContributors } = require('./controllers/FileController');
+const { addContent, deleteContent, getContent, getCourseContent, editContent, countData, getContributors, deleteCourse } = require('./controllers/FileController');
 
 router.get("/courses", getAllCourses); //
 router.get("/courses/count", countCourses); //
