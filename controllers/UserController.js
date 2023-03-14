@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const Users = require("../models/users");
 
 function token(rollNo) {
-    return jwt.sign({ rollNo }, `${process.env.JWT_SECRET}`, { expiresIn: "1d" })
+    return jwt.sign({ rollNo }, `${process.env.JWT_SECRET}`, { expiresIn: `${process.env.JWT_EXPIRY}` })
 }
 
 const addUser = async (req, res) => {
