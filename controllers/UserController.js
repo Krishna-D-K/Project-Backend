@@ -27,8 +27,10 @@ const addUser = async (req, res) => {
                 email: req.body.email,
                 instiMail: req.body.instiMail,
                 phone: req.body.phone,
-                fbLink: req.body.fbLink,
-                linkedinLink: req.body.linkedinLink
+                fbLink: "",
+                linkedinLink: "",
+                image: "",
+                createdBy: req.body.createdBy
             });
             res.status(200).json({ "message": "User created successfully!", "body": user, "token": jsonToken });
         } catch (err) {
@@ -48,7 +50,7 @@ const loginUser = async (req, res) => {
         const match = await bcrypt.compare(req.body.password, user[0].password)
         if (match) {
             const jsonToken = token(req.body.rollNo);
-            res.status(200).json({ "id": user[0].id, "name": user[0].name, "role": user[0].role, "rollNo": user[0].rollNo,"phone": user[0].phone, "email": user[0].email, "instiMail": user[0].instiMail, "fbLink": user[0].fbLink, "linkedinLink": user[0].linkedinLink, "token": jsonToken })
+            res.status(200).json({ "id": user[0].id, "name": user[0].name, "role": user[0].role, "rollNo": user[0].rollNo,"phone": user[0].phone, "email": user[0].email, "instiMail": user[0].instiMail, "fbLink": user[0].fbLink, "linkedinLink": user[0].linkedinLink, "image": user[0].image ,"token": jsonToken })
         }
         else {
             res.status(201).json("wrong password");
@@ -105,4 +107,30 @@ const editUser = async(req, res) =>{
     }
 }
 
-module.exports = { addUser, deleteUser, loginUser, getUsers, editUser };
+const getAdmins = async(req, res)=>{
+    const data = [];
+    try{
+        await Users.find({}).then((response)=>{
+            response.map((value, index)=>{
+                if(value.role!=="Owner"){
+                    const object = {
+                        name: value.name,
+                        role: value.role,
+                        email: value.email,
+                        fblink: value.fbLink,
+                        linkedinLink: value.linkedinLink,
+                        image: value.image
+                    }
+                    data.push(object);
+                }
+            })
+            data.sort((a,b)=>a.role-b.role);
+            res.status(200).json(data);
+        })
+    } catch(error){
+        console.log(error);
+        res.status(401).json({Error: error});
+    }
+}
+
+module.exports = { addUser, deleteUser, loginUser, getUsers, editUser, getAdmins };
