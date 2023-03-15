@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const upload = multer();
-const {getAllCourses, getCourse, addCourse, updateCourse, countCourses} = require('./controllers/CoursesController');
-const { addUser, deleteUser, loginUser, getUsers, editUser } = require('./controllers/UserController');
 const requireAuth = require("./middleware/requireAuth");
+const {getAllCourses, getCourse, addCourse, updateCourse, countCourses} = require('./controllers/CoursesController');
+const { addUser, deleteUser, loginUser, getUsers, editUser, getAdmins } = require('./controllers/UserController');
 const { addContent, deleteContent, getContent, getCourseContent, editContent, countData, getContributors, deleteCourse } = require('./controllers/FileController');
 
 router.get("/courses", getAllCourses); //
@@ -13,6 +13,7 @@ router.post("/courses", requireAuth, addCourse); //
 router.get("/courses/:code", getCourse); //
 router.delete("/courses/:id", requireAuth, deleteCourse); //
 router.patch("/courses/:id", requireAuth, updateCourse); //
+router.get("/admins", getAdmins) //
 router.get("/login/users",requireAuth, getUsers) //
 router.post("/login", loginUser); //
 router.post("/signin", addUser); //add auth to this route before upload //
