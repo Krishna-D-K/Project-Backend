@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const upload = multer();
+const upload = multer({limits:{
+    fileSize: 26214400 //25mb max file size
+}});
 const requireAuth = require("./middleware/requireAuth");
 const {getAllCourses, getCourse, addCourse, updateCourse, countCourses} = require('./controllers/CoursesController');
 const { addUser, deleteUser, loginUser, getUsers, editUser, getAdmins } = require('./controllers/UserController');
